@@ -1,0 +1,23 @@
+
+        ---
+        title: "Análisis de libros"
+        format: html
+        ---
+        
+        ```{r}
+        library(ggplot2)
+        library(gridExtra)
+        ``` 
+        
+        ## Gráfico Categórico
+        
+        ![Gráfico Categórico](grafico_categorico.png)
+        
+        ## Gráfico Relacional
+        
+        ![Gráfico Relacional](grafico_relacional.png)
+        
+        ## Gráfico de Distribución
+        
+        ![Gráfico de Distribución](grafico_distribucion.png)
+        

@@ -1,0 +1,61 @@
+---
+title: "Análisis de Libros Usando Flask, Selenium, y Seaborn"
+format: html
+editor: visual
+---
+
+```{python}
+# Importar las librerías necesarias
+from flask import Flask, jsonify
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import WebDriverException
+import seaborn as sns
+import matplotlib
+import matplotlib.pyplot as plt
+import pandas as pd
+
+matplotlib.use('Agg')  # Usar el backend 'Agg' para evitar problemas de GUI
+
+app = Flask(__name__)
+
+def scrape_data():
+    # Configuración del WebDriver de Chrome
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')  # Ejecuta Chrome en modo headless (sin GUI)
+    chrome_options.add_argument('--disable-gpu')
+    chrome_service = Service(executable_path='/path/to/chromedriver')  # Especifica la ruta a tu chromedriver
+    
+    driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
+    
+    try:
+        url = 'https://books.toscrape.com/'
+        driver.get(url)
+        driver.implicitly_wait(10)
+        
+        elementos = driver.find_elements(By.CSS_SELECTOR, 'ol.row > li')
+        datos = []
+
+        for elemento in elementos:
+            titulo = elemento.find_element(By.CSS_SELECTOR, 'h3 > a').get_attribute('title')
+            precio = elemento.find_element(By.CSS_SELECTOR, '.price_color').text
+            datos.append({'Título': titulo, 'Precio': float(precio[1:])})  # Convertir precio a float
+
+        return datos
+
+    except WebDriverException as e:
+        print(f"WebDriver error: {e}")
+        return []
+
+    finally:
+        driver.quit()
+
+@app.route('/api/scrape_books', methods=['GET'])
+def scrape_books():
+    data = scrape_data()
+    
+    if not data:
+        return jsonify({'error': 'No se pudieron obtener los datos'}), 500
+    
